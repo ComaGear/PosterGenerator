@@ -12,6 +12,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 
@@ -20,6 +25,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
@@ -119,33 +125,19 @@ public class Repository {
 
     public void saveImage(Image saveImage, Product product) {
         if(imageFolder == null || !imageFolder.isDirectory() || !imageFolder.exists()) return;
-
-        int height = (int) saveImage.getHeight();
-        int width = (int) saveImage.getWidth();
-        PixelReader pixelReader = saveImage.getPixelReader();
-        byte[] buffer = new byte[width * height * 4];
-        WritablePixelFormat<ByteBuffer> format = PixelFormat.getByteBgraInstance();
-        pixelReader.getPixels(0, 0, width, height, format, buffer, 0, width * 4);
-
+        
         int i = (int) (Math.random() * 1000000);
         String path = imageFolder.getAbsolutePath();
         String name = Integer.toString(i) + ".png";
-        System.out.println(name);
-        System.out.println(path);
         try {
             File file = new File(path + "/" + name);
-            // File file = new File("C:\Users\comag/Downloads/OatChocoBlueberry400gCover.png");
-
             file.createNewFile();
-            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
-            for(int count = 0; count < buffer.length; count += 4){
-                bufferedOutputStream.write(buffer[count + 2]);
-                bufferedOutputStream.write(buffer[count + 1]);
-                bufferedOutputStream.write(buffer[count]);
-                bufferedOutputStream.write(buffer[count + 3]);
-            }
-            bufferedOutputStream.flush();
-            bufferedOutputStream.close();
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(saveImage, null);
+            ImageIO.write(bufferedImage, "png", fileOutputStream);
+
+            fileOutputStream.close();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

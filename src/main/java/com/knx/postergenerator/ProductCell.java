@@ -1,23 +1,41 @@
 package com.knx.postergenerator;
 
 import javafx.collections.ObservableList;
-
+import javafx.geometry.Insets;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 
 import java.util.LinkedList;
 
-public class ProductCell<Product> extends ListCell<Product> {
-
+public class ProductCell<T> extends ListCell<Product> {
     
     
     @Override
-    protected void updateItem(Product item, boolean empty) {
-        
+    protected void updateItem(Product product, boolean empty) {
+        if(product == null || empty) {
+            setText("");
+            setGraphic(null);
+            return;
+        }
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+
+        Text titleText = new Text(product.getTitle());
+        Text sizeText = new Text(product.getTitle());
+        Text priceText = new Text(product.getTitle());
+
+        HBox hBox = new HBox(imageView, titleText, sizeText, priceText);
+        hBox.setPadding(new Insets(0, 20, 0, 20));
+        setGraphic(hBox);
     }
 
     public ProductCell() {

@@ -7,12 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -47,6 +50,11 @@ public class Main extends Application {
         ImageView imageView = new ImageView();
         imageView.setFitWidth(200);
         imageView.setFitHeight(200);
+        // imageView.maxHeight(200);
+        // imageView.maxWidth(200);
+        // imageView.prefWidth(200);
+        // imageView.prefHeight(200);
+        System.out.println(image.widthProperty());
         imageView.setImage(image);
 
         imageView.setOnDragOver((DragEvent event) ->{
@@ -76,14 +84,32 @@ public class Main extends Application {
             event.consume();
         });
 
+        MenuButton sizeMenuButton = new MenuButton();
+        sizeMenuButton.setText("square");
+        sizeMenuButton.setPrefWidth(300);
+        MenuItem squareMenuItem = new MenuItem("square");
+        MenuItem landspaceMediumMenuItem = new MenuItem("landspaceMedium");
+        MenuItem landspaceLageMenuItem = new MenuItem("landspaceLage");
+        MenuItem portraitMenuItem = new MenuItem("portrait");
+        EventHandler<ActionEvent> eventHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                MenuItem menuItem = (MenuItem)event.getSource();
+                sizeMenuButton.setText(menuItem.getText());
+            }
+        };
+        squareMenuItem.setOnAction(eventHandler);
+        landspaceMediumMenuItem.setOnAction(eventHandler);
+        landspaceLageMenuItem.setOnAction(eventHandler);
+        portraitMenuItem.setOnAction(eventHandler);
+        sizeMenuButton.getItems().setAll(squareMenuItem, landspaceMediumMenuItem, landspaceLageMenuItem, portraitMenuItem);
+
         TextField titleField = new TextField();
         titleField.setPrefWidth(300);
-        TextField subtitleField = new TextField();
-        subtitleField.setPrefWidth(300);
         TextField priceField = new TextField();
         priceField.setPrefWidth(300);
         Text titleText = new Text("Title :");
-        Text subtitleText = new Text("Subtitle :");
+        Text sizeText = new Text("Size :");
         Text priceText = new Text("Price :");
         priceField.textProperty().addListener((observable, oldValue, newValue) -> {
             if(!newValue.matches("\\d*"))
@@ -97,6 +123,9 @@ public class Main extends Application {
         saveButton.setOnAction(event -> {
             Image saveImage = imageView.getImage();
             Product product = new Product();
+            product.setTitle(titleField.getText());
+            product.setPrice(Double.parseDouble(priceField.getText()));
+            product.setSize(sizeMenuButton.getText());
 
             repository.saveImage(saveImage, product);
             repository.addProduct(product);
@@ -104,7 +133,7 @@ public class Main extends Application {
             listView.getItems().setAll(repository.loadProducts());
         });
 
-        VBox fieldPanel = new VBox(titleText, titleField, subtitleText, subtitleField, priceText, priceField, saveButton);
+        VBox fieldPanel = new VBox(titleText, titleField, sizeText, sizeMenuButton, priceText, priceField, saveButton);
         fieldPanel.setMargin(saveButton, new Insets(10, 0, 0, 0));
         fieldPanel.setPadding(new Insets(10));
 
