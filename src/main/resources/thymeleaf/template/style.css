@@ -1,0 +1,49 @@
+
+
+.cover_img{
+    display: block;
+    height: 200px;
+    width: 200px;
+    margin: 5px 5px 0 5px;
+}
+
+.product_title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    font-size: 1em;
+    margin: 0 5px 0 5px;
+    width: 200px;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow: hidden;
+    height: 3em;
+    line-height: 1.5em;
+}
+
+.price_Label{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;  
+    font-size: 3em;
+    width: 200px;
+    color:red;
+    margin: 0 5px 0 5px;
+}
+
+.holder {
+    border: 1px solid black;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.landspaceMedium {
+    min-width: 426px;
+    /* min-height: ; */
+}
+
+.landspaceMedium > .cover_img {
+    max-width: 420px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+}

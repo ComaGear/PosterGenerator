@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="C:\Users\comag\Documents\Projects\PosterGenerator\src\main\resources\thymeleaf\template\style.css"/>
+    <style th:replace="~{style :: style}"></style>
+    <title>poster</title>
+</head>
+<body>
+
+    <div th:each="${product : products}" th:class="holder ${product.size}">
+        <img class="cover_img"
+        th:src="${product.imgLocation} + ${product.imgName}"/>
+        <p class="product_title" th:text="${product.title}">Oat Chocolate 400g Oat Chocolate 400g Oat Chocolate 400g</p>
+        <p class="price_Label"  th:text="${product.price}">RM 8.80</p>
+    </div>
+    
+    <div class="holder">
+        <img class="cover_img" height="200px" width="200px" 
+        src="C:\Users\comag\Downloads\OatChocoBlueberry400gCover.png"/>
+        <p class="product_title">Oat Chocolate 400g Oat Chocolate 400g Oat Chocolate 400g</p>
+        <p class="price_Label">RM 8.80</p>
+    </div>
+    <div class="holder">
+        <img class="cover_img" height="200px" width="200px" 
+        src="C:\Users\comag\Downloads\OatChocoBlueberry400gCover.png"/>
+        <p class="product_title">Oat Chocolate 400g</p>
+        <p class="price_Label">RM 8.80</p>
+    </div>
+    <div class="holder landspaceMedium">
+        <img class="cover_img" height="200px" width="200px" 
+        src="C:\Users\comag\Downloads\IMG_8219.jpg"/>
+        <p class="product_title">Oat Chocolate 400g</p>
+        <p class="price_Label">RM 8.80</p>
+    </div>
+</body>
+</html>
