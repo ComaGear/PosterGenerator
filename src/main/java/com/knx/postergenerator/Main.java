@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -35,54 +37,97 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        
+
         this.stage = new Stage();
 
         stage.setScene(setupScene());
         stage.setTitle("Poster Generator");
         stage.show();
+
+        stage.setOnCloseRequest(event -> {
+            repository.saveProducts();
+            stage.close();
+        });
     }
 
     private Scene setupScene() throws FileNotFoundException {
-        
+
         InputStream systemResourceAsStream = ClassLoader.getSystemResourceAsStream("images/undefined.jpg");
         Image image = new Image(systemResourceAsStream);
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(200);
-        imageView.setFitHeight(200);
-        // imageView.maxHeight(200);
-        // imageView.maxWidth(200);
-        // imageView.prefWidth(200);
-        // imageView.prefHeight(200);
-        System.out.println(image.widthProperty());
+        VBox imageVBox = new VBox(imageView);
+        final int fitSize = 200;
+        imageVBox.setPrefWidth(fitSize);
+        imageVBox.setPrefHeight(fitSize);
+        int height = 0;
+        int width = 0;
+        double radio = image.widthProperty().doubleValue() / image.heightProperty().doubleValue();
+        // smaller than 1 was protrait, more than 1 was landspace.
+        if (radio < 1) {
+            height = fitSize;
+            width = (int) (fitSize * radio);
+            imageVBox.setPadding(new Insets(0, (fitSize - width)/2, 0, (fitSize - width)/2));
+        } else if(radio > 1) {
+            height = (int) (fitSize / radio);
+            width = fitSize;
+            imageVBox.setPadding(new Insets((fitSize - height)/2, 0, (fitSize - height)/2, 0));
+        } else {
+            height = fitSize;
+            width = fitSize;
+            imageVBox.setPadding(new Insets(0));
+        }
+        imageView.setFitHeight(height);
+        imageView.setFitWidth(width);
         imageView.setImage(image);
 
-        imageView.setOnDragOver((DragEvent event) ->{
-            if(event.getGestureSource() != imageView && (event.getDragboard().hasImage() || event.getDragboard().hasFiles())){
+        imageView.setOnDragOver((DragEvent event) -> {
+            if (event.getGestureSource() != imageView
+                    && (event.getDragboard().hasImage() || event.getDragboard().hasFiles())) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
         });
-        imageView.setOnDragDropped((DragEvent event) ->{
+        imageView.setOnDragDropped((DragEvent event) -> {
             Dragboard dragboard = event.getDragboard();
-            if(dragboard.hasImage() || dragboard.hasFiles()){
+            if (dragboard.hasImage() || dragboard.hasFiles()) {
                 FileInputStream fileInputStream = null;
                 try {
                     fileInputStream = new FileInputStream(dragboard.getFiles().get(0));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                if(fileInputStream == null ) {
+                if (fileInputStream == null) {
                     event.consume();
                     return;
                 }
-                imageView.setImage(new Image(fileInputStream));
+                Image newImage = new Image(fileInputStream);
+                imageView.setImage(newImage);
+                int newHeight = 0;
+                int newWidth = 0;
+                double newRadio = newImage.widthProperty().doubleValue() / newImage.heightProperty().doubleValue();
+                if (newRadio < 1) {
+                    newHeight = fitSize;
+                    newWidth = (int) (fitSize * newRadio);
+                    imageVBox.setPadding(new Insets(0, (fitSize - newWidth)/2, 0, (fitSize - newWidth)/2));
+                } else if(newRadio > 1) {
+                    newHeight = (int) (fitSize / newRadio);
+                    newWidth = fitSize;
+                    imageVBox.setPadding(new Insets((fitSize - newHeight)/2, 0, (fitSize - newHeight)/2, 0));
+                } else {
+                    newHeight = fitSize;
+                    newWidth = fitSize;
+                    imageVBox.setPadding(new Insets(0));
+                }
+                imageView.setFitHeight(newHeight);
+                imageView.setFitWidth(newWidth);
+                
                 event.setDropCompleted(true);
             } else {
                 event.setDropCompleted(false);
             }
             event.consume();
         });
+
 
         MenuButton sizeMenuButton = new MenuButton();
         sizeMenuButton.setText("square");
@@ -94,7 +139,7 @@ public class Main extends Application {
         EventHandler<ActionEvent> eventHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                MenuItem menuItem = (MenuItem)event.getSource();
+                MenuItem menuItem = (MenuItem) event.getSource();
                 sizeMenuButton.setText(menuItem.getText());
             }
         };
@@ -102,7 +147,8 @@ public class Main extends Application {
         landspaceMediumMenuItem.setOnAction(eventHandler);
         landspaceLageMenuItem.setOnAction(eventHandler);
         portraitMenuItem.setOnAction(eventHandler);
-        sizeMenuButton.getItems().setAll(squareMenuItem, landspaceMediumMenuItem, landspaceLageMenuItem, portraitMenuItem);
+        sizeMenuButton.getItems().setAll(squareMenuItem, landspaceMediumMenuItem, landspaceLageMenuItem,
+                portraitMenuItem);
 
         TextField titleField = new TextField();
         titleField.setPrefWidth(300);
@@ -112,13 +158,13 @@ public class Main extends Application {
         Text sizeText = new Text("Size :");
         Text priceText = new Text("Price :");
         priceField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if(!newValue.matches("\\d*"))
+            if (!newValue.matches("\\d*"))
                 newValue = newValue.replaceAll("[^\\d.]", "");
-                priceField.setText(newValue);
+            priceField.setText(newValue);
         });
 
         Button saveButton = new Button("Save");
-        saveButton.setPadding(new Insets(20, 100, 20 , 100));
+        saveButton.setPadding(new Insets(20, 100, 20, 100));
         saveButton.setPrefWidth(300);
         saveButton.setOnAction(event -> {
             Image saveImage = imageView.getImage();
@@ -129,24 +175,23 @@ public class Main extends Application {
 
             repository.saveImage(saveImage, product);
             repository.addProduct(product);
-            listView.getItems().clear();
-            listView.getItems().setAll(repository.loadProducts());
+            listView.getItems().add(product);
+            // listView.setItems(FXCollections.observableArrayList(repository.loadProducts()));
+            // listView.getItems().setAll(repository.loadProducts());
         });
 
         VBox fieldPanel = new VBox(titleText, titleField, sizeText, sizeMenuButton, priceText, priceField, saveButton);
         fieldPanel.setMargin(saveButton, new Insets(10, 0, 0, 0));
         fieldPanel.setPadding(new Insets(10));
 
-        HBox productEditPanel = new HBox(imageView, fieldPanel);
+        HBox productEditPanel = new HBox(imageVBox, fieldPanel);
         productEditPanel.setPadding(new Insets(20));
-        
 
         repository = new Repository();
         listView = new ListView<Product>();
-        listView.setCellFactory(new ProductCellFactory());
+        listView.setCellFactory(new ProductCellFactory(repository));
         listView.getItems().addAll(repository.loadProducts());
 
-        
         VBox vBox = new VBox(productEditPanel, listView);
 
         return new Scene(vBox);
@@ -155,5 +200,5 @@ public class Main extends Application {
     public static void main(String[] args) {
         Application.launch(args);
     }
-    
+
 }
