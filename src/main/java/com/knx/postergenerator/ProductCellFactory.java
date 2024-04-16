@@ -7,7 +7,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.Dragboard;
 import javafx.util.Callback;
@@ -41,12 +40,13 @@ public class ProductCellFactory implements Callback<ListView<Product>, ListCell<
 
             event.setDropCompleted(true);
             event.consume();
-
         });
 
         MenuItem menuItem = new MenuItem("delete");
         menuItem.setOnAction(event ->{
-            // TODO
+            Product item = productCell.getItem();
+            repository.deleteProduct(item);
+            productCell.getListView().getItems().remove(item);
         });
         ContextMenu contextMenu = new ContextMenu(menuItem);
         productCell.setContextMenu(contextMenu);

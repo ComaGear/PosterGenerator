@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
+
+import org.thymeleaf.TemplateEngine;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -13,12 +16,14 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
@@ -27,6 +32,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -192,7 +198,30 @@ public class Main extends Application {
         listView.setCellFactory(new ProductCellFactory(repository));
         listView.getItems().addAll(repository.loadProducts());
 
-        VBox vBox = new VBox(productEditPanel, listView);
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File(App.getProperty(App.DEFAULT_INITIAL_DIRECTORY)));
+        Button processButton = new Button("process");
+        processButton.setPrefWidth(500);
+        processButton.setPadding(new Insets(5, 0, 5, 0));
+        processButton.setOnAction(event -> {
+            directoryChooser.setTitle("select where to save the output");
+            File folder = directoryChooser.showDialog(stage);
+            App.setProperty(App.DEFAULT_INITIAL_DIRECTORY, folder.getAbsolutePath());
+            if(!folder.exists()) return;
+
+            App app = new App();
+            try {
+                app.saveResult(folder.getAbsolutePath(), app.render(repository.loadProducts()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+
+        VBox vBox = new VBox(productEditPanel, listView, processButton);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setMargin(processButton, new Insets(5));
 
         return new Scene(vBox);
     }
