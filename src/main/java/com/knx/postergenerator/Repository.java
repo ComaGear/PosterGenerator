@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -144,5 +145,27 @@ public class Repository {
         File file = new File("./data");
         if(!file.exists()) file.mkdir();
         this.imageFolder = file;
+    }
+
+    public void clearCacheImage() {
+        File folder = new File("./data");
+        if(!folder.isDirectory()) return;
+
+        ArrayList<String> containedFileNames = new ArrayList<String>(products.size());
+        for(Product product : products){
+            containedFileNames.add(product.getImgName());
+        }
+        
+        ArrayList<File> toDelele = new ArrayList<File>();
+        File[] listFiles = folder.listFiles();
+        for(int i = 0; i < listFiles.length; i++){
+            if(!containedFileNames.contains(listFiles[i].getName())) {
+                toDelele.add(listFiles[i]);
+            }
+        }
+
+        for(File file : toDelele){
+            file.delete();
+        }
     }
 }

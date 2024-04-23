@@ -12,8 +12,8 @@
     <div th:each="product : ${products}" th:class="'holder ' + ${product.size}">
         <img class="cover_img"
         th:src="${product.imgLocation} + '/' + ${product.imgName}"/>
-        <p class="product_title" th:text="#numbers.formatDecimal ${product.title}"></p>
-        <p class="price_Label"  th:text="'RM ' + ${product.price}"></p>
+        <p class="product_title" th:text=" ${product.title}"></p>
+        <p class="price_Label"  th:text="'RM ' + ${#numbers.formatDecimal(product.price, 0, 2)}"></p>
     </div>
 </body>
 </html>
