@@ -26,8 +26,34 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 public class Repository {
 
+    private static final String DATA = "./data";
+    private static final String IMAGES = "./images";
+    private static final String DEFAULT_WORKSPACE = "default";
     private List<Product> products;
     private File imageFolder;
+    private String currentWorkspace;
+    private File dataFolder;
+
+    public void setCurrentWorkspace(String name){
+        this.currentWorkspace = name;
+        this.products = null;
+        loadProducts();
+    }
+
+    public String getCurrentWorkspace(){
+        return this.currentWorkspace;
+    }
+
+    public List<String> getAllWorkspace(){
+        ArrayList<String> filesNames = new ArrayList<String>();
+        File[] listFiles = dataFolder.listFiles();
+        for(int i = 0; i < listFiles.length; i++){
+            String name = listFiles[i].getName();
+            name = name.substring(0, name.indexOf("."));
+            filesNames.add(name);
+        }
+        return filesNames;
+    }
 
     public void addProduct(Product product){
         products.add(product);
@@ -43,7 +69,9 @@ public class Repository {
         this.products = new LinkedList<Product>();
 
         try {
-            Object object = new JSONParser().parse(new FileReader("./PosterReposition.json"));
+            String FilePathName = dataFolder.getAbsolutePath() + "/" +  currentWorkspace + ".json";
+            // String FilePathName = "./data/" + currentWorkspace + ".json";
+            Object object = new JSONParser().parse(new FileReader(FilePathName));
             JSONObject json = (JSONObject) object;
 
             JSONArray productList = (JSONArray)json.get("products");
@@ -69,11 +97,15 @@ public class Repository {
             }
             
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-
-            File file = new File("./PosterReposition.json");
+            if(currentWorkspace == null) setCurrentWorkspace(DEFAULT_WORKSPACE);
+        
+            String FilePathName = dataFolder.getAbsolutePath() + "/" + currentWorkspace + ".json";
+            String imagesPathName = imageFolder.getAbsolutePath() + "/" + currentWorkspace;
+            File file = new File(FilePathName);
+            File imageFolder = new File(imagesPathName);
             try {
                 file.createNewFile();
+                imageFolder.mkdir();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -105,7 +137,8 @@ public class Repository {
 
 
         try {
-            PrintWriter printWriter = new PrintWriter("./PosterReposition.json");
+            String FilePathName = dataFolder.getAbsolutePath() + "/" + currentWorkspace + ".json";
+            PrintWriter printWriter = new PrintWriter(FilePathName);
             printWriter.write(jsonObject.toJSONString());
             printWriter.flush();
             printWriter.close();
@@ -120,7 +153,7 @@ public class Repository {
         if(imageFolder == null || !imageFolder.isDirectory() || !imageFolder.exists()) return;
         
         int i = (int) (Math.random() * 1000000);
-        String path = imageFolder.getAbsolutePath();
+        String path = imageFolder.getAbsolutePath() + "/" + currentWorkspace;
         String name = Integer.toString(i) + ".png";
         try {
             File file = new File(path + "/" + name);
@@ -142,13 +175,17 @@ public class Repository {
     }
 
     public Repository(){
-        File file = new File("./data");
-        if(!file.exists()) file.mkdir();
-        this.imageFolder = file;
+        File imagesFile = new File(IMAGES);
+        File dataFile = new File(DATA);
+        if(!imagesFile.exists()) imagesFile.mkdir();
+        if(!dataFile.exists()) dataFile.mkdir();
+        this.imageFolder = imagesFile;
+        this.dataFolder = dataFile;
     }
 
     public void clearCacheImage() {
-        File folder = new File("./data");
+        String FilePathName = imageFolder.getAbsolutePath() + "/" + currentWorkspace;
+        File folder = new File(FilePathName);
         if(!folder.isDirectory()) return;
 
         ArrayList<String> containedFileNames = new ArrayList<String>(products.size());
@@ -167,5 +204,10 @@ public class Repository {
         for(File file : toDelele){
             file.delete();
         }
+    }
+
+    public void createWorkspace(String createName) {
+        setCurrentWorkspace(createName);
+        loadProducts();
     }
 }

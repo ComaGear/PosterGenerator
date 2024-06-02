@@ -13,6 +13,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -180,7 +182,7 @@ public class Main extends Application {
         });
 
         VBox fieldPanel = new VBox(titleText, titleField, sizeText, sizeMenuButton, priceText, priceField, saveButton);
-        fieldPanel.setMargin(saveButton, new Insets(10, 0, 0, 0));
+        VBox.setMargin(saveButton, new Insets(10, 0, 0, 0));
         fieldPanel.setPadding(new Insets(10));
 
         HBox productEditPanel = new HBox(imageVBox, fieldPanel);
@@ -212,11 +214,43 @@ public class Main extends Application {
         });
 
 
-        VBox vBox = new VBox(productEditPanel, listView, processButton);
+        VBox vBox = new VBox(setupMenuBar(), productEditPanel, listView, processButton);
         vBox.setAlignment(Pos.CENTER);
-        vBox.setMargin(processButton, new Insets(5));
+        VBox.setMargin(processButton, new Insets(5));
 
         return new Scene(vBox);
+    }
+
+    private MenuBar setupMenuBar(){
+        MenuBar menuBar = new MenuBar();
+        Menu menu = new Menu("worspace");
+        menuBar.getMenus().add(menu);
+
+        MenuItem loadWorkspaceMenuButton = new MenuItem("load workspace");
+        MenuItem createWorkspaceMenuButton = new MenuItem("create workspace");
+        menu.getItems().add(loadWorkspaceMenuButton);
+        menu.getItems().add(createWorkspaceMenuButton);
+
+        loadWorkspaceMenuButton.setOnAction(e ->{
+            WorkspaceChooser workspaceChooser = new WorkspaceChooser(repository.getAllWorkspace());
+            workspaceChooser.getStage().showAndWait();
+            String selectedWorkspaceString = workspaceChooser.getSelectedWorkspaceString();
+            repository.setCurrentWorkspace(selectedWorkspaceString);
+            listView.getItems().clear();
+            listView.getItems().setAll(repository.loadProducts());
+        });
+
+        createWorkspaceMenuButton.setOnAction(e -> {
+            WorkspaceCreator workspaceCreator = new WorkspaceCreator();
+            workspaceCreator.getStage().showAndWait();
+            String createName = workspaceCreator.getCreateName();
+            repository.createWorkspace(createName);
+            listView.getItems().clear();
+            listView.getItems().setAll(repository.loadProducts());
+        });
+
+
+        return menuBar;
     }
 
     public static void main(String[] args) {
